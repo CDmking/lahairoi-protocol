@@ -585,12 +585,13 @@ window.WUWA = window.WUWA || {};
                  [0,4],[1,4],[2,4],[4,4],[5,4],[6,4],[7,4]],
           shapeMatrix:[[1]], target:[3,4],
           desc:'内部交叉点填满可同时消除行与列' },
-        { name:'游戏结束', fills:null, except:[[0,0],[4,4],[7,7]],
+        { name:'游戏结束', fills:null, except:[[0,0],[1,3],[2,6],[3,1],[4,4],[5,7],[6,2],[7,5]],
           shapeMatrix:[[1,1,1],[1,1,1],[1,1,1]], target:[0,0],
-          desc:'棋盘已满，无合适空间容纳更大方块' }
+          desc:'空缺位置分散，无合适空间容纳更大方块' }
     ];
 
     var currentScene = 0;
+    var sceneVersion = 0;
     var autoPlayTimer = null;
 
     function animateShapeToBoard(shapeData, slotIndex, targetX, targetY, callback) {
@@ -726,12 +727,14 @@ window.WUWA = window.WUWA || {};
 
         document.getElementById('demoPrevBtn').disabled = index === 0;
         document.getElementById('demoNextBtn').disabled = index === DEMO_SCENES.length - 1;
+        sceneVersion++;
     }
 
     function playScene() {
         var scene = DEMO_SCENES[currentScene];
         var shapeData = state.availableShapes[0];
         if (!shapeData) return;
+        var savedVersion = sceneVersion;
 
         var slotIdx = 0;
         clearTraySlot(slotIdx);
@@ -741,10 +744,12 @@ window.WUWA = window.WUWA || {};
 
         if (currentScene < 4) {
             animateShapeToBoard(shapeData, slotIdx, targetX, targetY, function () {
+                if (savedVersion !== sceneVersion) return;
                 if (!state.isDemoMode) return;
                 placeShape(shapeData, targetX, targetY);
                 updateScoreDisplay();
                 setTimeout(function () {
+                    if (savedVersion !== sceneVersion) return;
                     if (!state.isDemoMode) return;
                     checkLines();
                     updateScoreDisplay();
@@ -757,6 +762,7 @@ window.WUWA = window.WUWA || {};
             });
         } else {
             animateShapeToBoard(shapeData, slotIdx, targetX, targetY, function () {
+                if (savedVersion !== sceneVersion) return;
                 if (!state.isDemoMode) return;
 
                 var cellEl = boardEl.children[0];
@@ -780,6 +786,7 @@ window.WUWA = window.WUWA || {};
 
                 setTimeout(function () {
                     xMark.remove();
+                    if (savedVersion !== sceneVersion) return;
                     if (!state.isDemoMode) return;
                     state.availableShapes = [null, null, null];
                     clearTraySlot(0);
@@ -800,7 +807,7 @@ window.WUWA = window.WUWA || {};
         if (overlay) overlay.classList.add('show');
         applyScene(0);
         if (autoPlayTimer) { clearTimeout(autoPlayTimer); autoPlayTimer = null; }
-        autoPlayTimer = setTimeout(playScene, 2000);
+        autoPlayTimer = setTimeout(playScene, 1000);
     }
 
     function closeDemo() {
