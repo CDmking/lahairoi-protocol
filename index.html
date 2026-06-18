@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAHAI-ROI PROTOCOL - 拉海洛方块</title>
+    <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+    <div class="game-terminal">
+        <div class="portrait-warning" id="portraitWarning">
+            <div class="icon">📱</div>
+            <div style="line-height: 1.5;">系统侦测到终端姿态异常<br>请旋转设备至 <b>[ 横屏 ]</b> 模式以解除锁定</div>
+        </div>
+
+        <div class="terminal-container">
+            <button class="help-btn" id="helpBtn" title="玩法说明">?</button>
+
+            <div class="toast-container" id="toastBox">Message</div>
+
+            <div class="demo-overlay" id="demoOverlay">
+                <div class="demo-panel">
+                    <div class="demo-header">
+                        <button class="demo-nav-btn" id="demoPrevBtn">◀</button>
+                        <div class="demo-mid">
+                            <div class="demo-title" id="demoTitle"></div>
+                            <div class="demo-dots" id="demoDots">
+                                <span class="demo-dot active" data-index="0"></span>
+                                <span class="demo-dot" data-index="1"></span>
+                                <span class="demo-dot" data-index="2"></span>
+                                <span class="demo-dot" data-index="3"></span>
+                                <span class="demo-dot" data-index="4"></span>
+                            </div>
+                        </div>
+                        <button class="demo-nav-btn" id="demoNextBtn">▶</button>
+                        <button class="demo-overlay-close" id="demoOverlayClose">✕</button>
+                    </div>
+                    <div class="demo-desc" id="demoDesc"></div>
+                    <button class="demo-play-btn" id="demoPlayBtn" disabled>重播</button>
+                </div>
+            </div>
+
+            <div class="custom-modal" id="importModal">
+                <div class="game-modal-content">
+                    <div class="title-glitch" style="font-size: 16px;">DATA IMPORT_</div>
+                    <div style="font-size: 12px; color: #888;">请在此粘贴导出的排行榜 JSON 数据：</div>
+                    <textarea id="importDataInput" placeholder='{"records":[{"score":9999,"date":"2026-05-21"}],"attrHighScores":{"glacio":0,"fusion":0,"electro":0,"aero":0,"spectro":0,"havoc":0}}'></textarea>
+                    <div class="modal-btns">
+                        <button class="action-btn" id="cancelImportBtn">CANCEL</button>
+                        <button class="action-btn" id="confirmImportBtn" style="color:var(--accent-color); border-color:var(--accent-color);">OVERRIDE</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="custom-modal" id="clearModal">
+                <div class="game-modal-content">
+                    <div class="title-glitch" style="font-size: 16px; color: var(--danger-color); text-shadow: 0 0 5px var(--danger-color);">WARNING_</div>
+                    <div style="font-size: 14px; color: #ccc;">确认要清除所有排行榜和属性最高分数据吗？<br>此操作不可逆转。</div>
+                    <div class="modal-btns">
+                        <button class="action-btn" id="cancelClearBtn">CANCEL</button>
+                        <button class="action-btn danger-btn" id="confirmClearBtn" style="color:var(--danger-color); border-color:var(--danger-color);">PURGE DATA</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-over-overlay" id="gameOverOverlay">
+                <div class="game-over-text">SYSTEM HALTED</div>
+                <div style="color: #888; font-size: 14px;">NO VALID SPACE IN MATRIX</div>
+                <button class="restart-btn" id="restartBtn">Reboot System</button>
+            </div>
+
+            <div class="header">
+                <div class="header-top">
+                    <div class="title-glitch">LAHAI-ROI<br>PROTOCOL</div>
+                    <div class="score-board">
+                        <div class="score-item">
+                            <span class="score-label">SCORE</span>
+                            <span class="score-value" id="currentScore">0</span>
+                        </div>
+                        <div class="score-item">
+                            <span class="score-label">HIGH SCORE</span>
+                            <span class="score-value" id="highScore">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="difficulty-selector">
+                    <button class="diff-btn active" data-diff="easy">SIMPLE</button>
+                    <button class="diff-btn" data-diff="normal">STANDARD</button>
+                    <button class="diff-btn" data-diff="hard">CHALLENGE</button>
+                </div>
+
+                <div class="attr-stats">
+                    <div class="attr-item"><div class="attr-dot attr-glacio-bg"></div><span class="attr-glacio-color" id="score-glacio">0</span></div>
+                    <div class="attr-item"><div class="attr-dot attr-fusion-bg"></div><span class="attr-fusion-color" id="score-fusion">0</span></div>
+                    <div class="attr-item"><div class="attr-dot attr-electro-bg"></div><span class="attr-electro-color" id="score-electro">0</span></div>
+                    <div class="attr-item"><div class="attr-dot attr-aero-bg"></div><span class="attr-aero-color" id="score-aero">0</span></div>
+                    <div class="attr-item"><div class="attr-dot attr-spectro-bg"></div><span class="attr-spectro-color" id="score-spectro">0</span></div>
+                    <div class="attr-item"><div class="attr-dot attr-havoc-bg"></div><span class="attr-havoc-color" id="score-havoc">0</span></div>
+                </div>
+            </div>
+
+            <div class="game-area">
+                <div class="leaderboard-container">
+                    <div class="leaderboard-title">TOP RECORDS</div>
+                    <ul class="leaderboard-list" id="leaderboardList"></ul>
+                    <div class="leaderboard-actions">
+                        <button class="action-btn" id="exportBtn">EXPORT</button>
+                        <button class="action-btn" id="importBtn">IMPORT</button>
+                        <button class="action-btn danger-btn" id="clearBtn" style="color:#ff4d4d; border-color:#ff4d4d;">CLEAR</button>
+                    </div>
+                </div>
+
+                <div class="board-container">
+                    <div class="board" id="board"></div>
+                </div>
+
+                <div class="tray-container" id="tray">
+                    <div class="tray-slot" id="slot-0"></div>
+                    <div class="tray-slot" id="slot-1"></div>
+                    <div class="tray-slot" id="slot-2"></div>
+                </div>
+            </div>
+
+            <div class="footer-credits">
+                <span>Original Concept by KURO GAMES (Wuthering Waves)</span> |
+                <span>Recreated by <a href="https://space.bilibili.com/831032/" target="_blank" rel="noopener noreferrer">蒲公桜</a></span> |
+                <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>
