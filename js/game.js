@@ -1,105 +1,3 @@
-    var scaleFactor = 1;
-    if (window.innerHeight < 700 || window.innerWidth < 900) {
-        var scaleH = window.innerHeight / 700;
-        var scaleW = window.innerWidth / 900;
-        scaleFactor = Math.min(scaleH, scaleW);
-        if (scaleFactor > 1) scaleFactor = 1;
-    }
-
-    var CONFIG = {
-        BOARD_SIZE: 8,
-        CELL_SIZE: Math.floor(54 * scaleFactor),
-        GAP: Math.floor(2 * scaleFactor) || 1,
-        SCORE_BLOCK: 10,
-        SCORE_LINE: 100,
-        SCORE_MULTI_MULTIPLIER: 50,
-        ATTR_SCORE_BONUS: 5
-    };
-
-    var TRAY_CELL_RATIO = 0.65;
-    var TRAY_CELL_SIZE = Math.floor(CONFIG.CELL_SIZE * TRAY_CELL_RATIO);
-
-    document.documentElement.style.setProperty('--cell-size', CONFIG.CELL_SIZE + 'px');
-    document.documentElement.style.setProperty('--grid-gap', CONFIG.GAP + 'px');
-
-    var ATTRIBUTES = [
-        { id: 'glacio', icon: '<img src="img/attribute/Glacio.svg" class="attr-icon">' },
-        { id: 'fusion', icon: '<img src="img/attribute/Fusion.svg" class="attr-icon">' },
-        { id: 'electro', icon: '<img src="img/attribute/Electro.svg" class="attr-icon">' },
-        { id: 'aero', icon: '<img src="img/attribute/Aero.svg" class="attr-icon">' },
-        { id: 'spectro', icon: '<img src="img/attribute/Spectro.svg" class="attr-icon">' },
-        { id: 'havoc', icon: '<img src="img/attribute/Havoc.svg" class="attr-icon">' }
-    ];
-
-    var SHAPES_EASY = [
-        [[1]],
-        [[1, 1]], [[1], [1]],
-        [[1, 1, 1]], [[1], [1], [1]],
-        [[1, 1], [1, 1]],
-        [[1, 1, 1, 1]], [[1], [1], [1], [1]],
-        [[1, 1], [1, 0]], [[1, 1], [0, 1]], [[0, 1], [1, 1]], [[1, 0], [1, 1]]
-    ];
-
-    var SHAPES_ALL = [
-        [[1]],
-        [[1, 1]], [[1], [1]],
-        [[1, 1, 1]], [[1], [1], [1]],
-        [[1, 1, 1, 1]], [[1], [1], [1], [1]],
-        [[1, 1], [1, 1]],
-        [[1, 1, 1], [1, 1, 1], [1, 1, 1]],
-        [[1, 1], [1, 0]], [[1, 1], [0, 1]], [[0, 1], [1, 1]], [[1, 0], [1, 1]],
-        [[1, 1, 1], [1, 0, 0], [1, 0, 0]], [[1, 1, 1], [0, 0, 1], [0, 0, 1]],
-        [[1, 0, 0], [1, 0, 0], [1, 1, 1]], [[0, 0, 1], [0, 0, 1], [1, 1, 1]],
-        [[0, 1, 0], [1, 1, 1]],
-        [[1, 1, 1], [0, 1, 0]],
-        [[1, 0], [1, 1], [1, 0]],
-        [[0, 1], [1, 1], [0, 1]],
-        [[0, 1, 1], [1, 1, 0]],
-        [[1, 0], [1, 1], [0, 1]],
-        [[1, 1, 0], [0, 1, 1]],
-        [[0, 1], [1, 1], [1, 0]]
-    ];
-
-    var SHAPES_HARD = [
-        [[1, 1, 1, 1]], [[1], [1], [1], [1]],
-        [[1, 1], [1, 0]], [[1, 1], [0, 1]], [[0, 1], [1, 1]], [[1, 0], [1, 1]],
-        [[1, 1, 1], [1, 0, 0], [1, 0, 0]], [[1, 1, 1], [0, 0, 1], [0, 0, 1]],
-        [[1, 0, 0], [1, 0, 0], [1, 1, 1]], [[0, 0, 1], [0, 0, 1], [1, 1, 1]],
-        [[0, 1, 0], [1, 1, 1]],
-        [[1, 1, 1], [0, 1, 0]],
-        [[1, 0], [1, 1], [1, 0]],
-        [[0, 1], [1, 1], [0, 1]],
-        [[0, 1, 1], [1, 1, 0]],
-        [[1, 0], [1, 1], [0, 1]],
-        [[1, 1, 0], [0, 1, 1]],
-        [[0, 1], [1, 1], [1, 0]],
-        [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
-    ];
-
-    var DEFAULT_ATTR_SCORES = { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 };
-
-    var DIFFICULTY_CONFIG = {
-        easy:   { scoreMultiplier: 0.7 },
-        normal: { scoreMultiplier: 1.0 },
-        hard:   { scoreMultiplier: 1.5 }
-    };
-
-    var state = {
-        board: [],
-        score: 0,
-        highScore: 0,
-        difficulty: 'easy',
-        isDemoMode: false,
-        attrScores: Object.assign({}, DEFAULT_ATTR_SCORES),
-        availableShapes: [null, null, null],
-        isGameOver: false
-    };
-
-    var leaderboardData = {
-        records: [],
-        attrHighScores: Object.assign({}, DEFAULT_ATTR_SCORES)
-    };
-
     var boardEl, traySlots, currentScoreEl, highScoreEl, gameOverOverlay, restartBtn;
     var leaderboardListEl, exportBtn, importBtn, toastBox, importModal, importDataInput;
     var cancelImportBtn, confirmImportBtn, clearBtn, clearModal, cancelClearBtn, confirmClearBtn;
@@ -110,86 +8,6 @@
     var draggedSlotIndex = -1;
     var dragOffsetX = 0;
     var dragOffsetY = 0;
-
-    function showToast(message) {
-        toastBox.innerText = message;
-        toastBox.classList.add('show');
-        setTimeout(function () {
-            toastBox.classList.remove('show');
-        }, 2500);
-    }
-
-    function loadLeaderboard() {
-        try {
-            var stored = localStorage.getItem('lahairo_v3_leaderboard');
-            if (stored) {
-                var parsed = JSON.parse(stored);
-                if (Array.isArray(parsed)) {
-                    leaderboardData = {
-                        records: parsed,
-                        attrHighScores: Object.assign({}, DEFAULT_ATTR_SCORES)
-                    };
-                } else {
-                    leaderboardData = parsed;
-                    if (!leaderboardData.attrHighScores) {
-                        leaderboardData.attrHighScores = { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 };
-                    }
-                }
-            } else {
-                leaderboardData = {
-                    records: [],
-                    attrHighScores: Object.assign({}, DEFAULT_ATTR_SCORES)
-                };
-            }
-        } catch (e) {
-            leaderboardData = {
-                records: [],
-                attrHighScores: Object.assign({}, DEFAULT_ATTR_SCORES)
-            };
-        }
-        updateHighScore();
-    }
-
-    function updateHighScore() {
-        state.highScore = leaderboardData.records.length > 0 ? leaderboardData.records[0].score : 0;
-        highScoreEl.innerText = state.highScore;
-    }
-
-    function saveLeaderboard() {
-        localStorage.setItem('lahairo_v3_leaderboard', JSON.stringify(leaderboardData));
-        updateHighScore();
-        renderLeaderboard();
-    }
-
-    function renderLeaderboard() {
-        leaderboardListEl.innerHTML = '';
-        if (leaderboardData.records.length === 0) {
-            var emptyLi = document.createElement('li');
-            emptyLi.className = 'leaderboard-item';
-            emptyLi.style.justifyContent = 'center';
-            emptyLi.innerHTML = '<span style="color: #666;">NO DATA</span>';
-            leaderboardListEl.appendChild(emptyLi);
-            return;
-        }
-        leaderboardData.records.slice(0, 10).forEach(function (record, index) {
-            var li = document.createElement('li');
-            li.className = 'leaderboard-item';
-            li.innerHTML = '<span class="rank-score">#' + (index + 1) + ' &nbsp; ' + record.score + '</span><span class="date">' + record.date + '</span>';
-            leaderboardListEl.appendChild(li);
-        });
-    }
-
-    function addScoreToLeaderboard(finalScore) {
-        if (finalScore <= 0) return;
-        var today = new Date();
-        var dateStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-        leaderboardData.records.push({ score: finalScore, date: dateStr });
-        leaderboardData.records.sort(function (a, b) { return b.score - a.score; });
-        if (leaderboardData.records.length > 10) {
-            leaderboardData.records = leaderboardData.records.slice(0, 10);
-        }
-        saveLeaderboard();
-    }
 
     function init() {
         if (state.isDemoMode) {
@@ -222,25 +40,6 @@
         }
 
         fillTray(true);
-    }
-
-    function countPlacements(matrix) {
-        var count = 0;
-        for (var y = 0; y < CONFIG.BOARD_SIZE; y++) {
-            for (var x = 0; x < CONFIG.BOARD_SIZE; x++) {
-                if (canPlaceShape(matrix, x, y)) count++;
-            }
-        }
-        return count;
-    }
-
-    function getShapeWeight(placements, area, difficulty) {
-        var p = placements + 1;
-        switch (difficulty) {
-            case 'easy':   return Math.pow(p, 2) / area;
-            case 'normal': return p;
-            case 'hard':   return Math.pow(p, 0.3) * area;
-        }
     }
 
     function fillTray(force) {
@@ -290,47 +89,6 @@
             renderShapeInSlot(shapeData, i);
         }
         checkGameOver();
-    }
-
-    function renderShapeInSlot(shapeData, slotIndex) {
-        var slotEl = traySlots[slotIndex];
-        slotEl.innerHTML = '';
-        if (!shapeData) return;
-
-        var matrix = shapeData.matrix;
-        var attr = shapeData.attribute;
-        var rows = matrix.length;
-        var cols = matrix[0].length;
-
-        var cells = '';
-        for (var sy = 0; sy < rows; sy++) {
-            for (var sx = 0; sx < cols; sx++) {
-                var isFilled = matrix[sy][sx] === 1;
-                var cls = isFilled ? 'shape-cell attr-' + attr.id + '-bg' : 'shape-cell empty';
-                var sty = isFilled ? ' style="box-shadow:inset 0 0 5px rgba(255,255,255,0.8),0 0 10px var(--attr-' + attr.id + ')"' : '';
-                var inner = isFilled ? attr.icon : '';
-                cells += '<div class="' + cls + '"' + sty + '>' + inner + '</div>';
-            }
-        }
-
-        var shapeEl = document.createElement('div');
-        shapeEl.className = 'shape-element';
-        shapeEl.style.cssText = 'grid-template-columns:repeat(' + cols + ',' + TRAY_CELL_SIZE + 'px);grid-template-rows:repeat(' + rows + ',' + TRAY_CELL_SIZE + 'px);--cell-size:' + TRAY_CELL_SIZE + 'px;left:calc(50% - ' + (cols * TRAY_CELL_SIZE + (cols - 1) * CONFIG.GAP) / 2 + 'px);top:calc(50% - ' + (rows * TRAY_CELL_SIZE + (rows - 1) * CONFIG.GAP) / 2 + 'px)';
-        shapeEl.dataset.slotIndex = slotIndex;
-        shapeEl.shapeData = shapeData;
-        shapeEl.innerHTML = cells;
-        shapeEl.addEventListener('mousedown', onDragStart);
-        shapeEl.addEventListener('touchstart', onDragStart, { passive: false });
-
-        slotEl.appendChild(shapeEl);
-    }
-
-    function setShapeGrid(size) {
-        var m = draggedShapeData.matrix;
-        var c = m[0].length, r = m.length;
-        draggedElement.style.gridTemplateColumns = 'repeat(' + c + ', ' + size + 'px)';
-        draggedElement.style.gridTemplateRows = 'repeat(' + r + ', ' + size + 'px)';
-        draggedElement.style.setProperty('--cell-size', size + 'px');
     }
 
     function onDragStart(e) {
@@ -440,20 +198,6 @@
         return null;
     }
 
-    function canPlaceShape(matrix, startX, startY) {
-        for (var cy = 0; cy < matrix.length; cy++) {
-            for (var cx = 0; cx < matrix[0].length; cx++) {
-                if (matrix[cy][cx] === 1) {
-                    var bX = startX + cx;
-                    var bY = startY + cy;
-                    if (bX < 0 || bX >= CONFIG.BOARD_SIZE || bY < 0 || bY >= CONFIG.BOARD_SIZE) return false;
-                    if (state.board[bY][bX] !== null) return false;
-                }
-            }
-        }
-        return true;
-    }
-
     function placeShape(shapeData, startX, startY) {
         var matrix = shapeData.matrix;
         var attr = shapeData.attribute;
@@ -475,34 +219,6 @@
             }
         }
         addScore(blocksPlaced * CONFIG.SCORE_BLOCK);
-    }
-
-    function highlightBoard(clientX, clientY) {
-        clearBoardHighlight();
-        if (!draggedShapeData) return;
-
-        var boardPos = getBoardCoordinates(clientX, clientY);
-        if (!boardPos) return;
-
-        var matrix = draggedShapeData.matrix;
-        var isValid = canPlaceShape(matrix, boardPos.x, boardPos.y);
-        var classToAdd = isValid ? 'hover' : 'invalid';
-
-        for (var hy = 0; hy < matrix.length; hy++) {
-            for (var hx = 0; hx < matrix[0].length; hx++) {
-                if (matrix[hy][hx] === 1) {
-                    var bX = boardPos.x + hx;
-                    var bY = boardPos.y + hy;
-                    if (bX >= 0 && bX < CONFIG.BOARD_SIZE && bY >= 0 && bY < CONFIG.BOARD_SIZE) {
-                        boardEl.children[bY * CONFIG.BOARD_SIZE + bX].classList.add(classToAdd);
-                    }
-                }
-            }
-        }
-    }
-
-    function clearBoardHighlight() {
-        Array.from(boardEl.children).forEach(function (cell) { cell.classList.remove('hover', 'invalid'); });
     }
 
     function checkLines() {
@@ -603,18 +319,6 @@
     function addScore(points) {
         state.score += Math.floor(points * DIFFICULTY_CONFIG[state.difficulty].scoreMultiplier);
         updateScoreDisplay();
-    }
-
-    function updateScoreDisplay() {
-        currentScoreEl.innerText = state.score;
-    }
-
-    function updateAttrScoreDisplay() {
-        Object.keys(attrScoreEls).forEach(function (key) {
-            var current = state.attrScores[key];
-            var highest = leaderboardData.attrHighScores[key];
-            attrScoreEls[key].innerText = current + ' (' + highest + ')';
-        });
     }
 
     var DEMO_SCENES = [
