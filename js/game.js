@@ -79,9 +79,9 @@
     var DEFAULT_ATTR_SCORES = { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 };
 
     var DIFFICULTY_CONFIG = {
-        easy: { shapes: SHAPES_EASY, scoreMultiplier: 0.7 },
-        normal: { shapes: SHAPES_ALL, scoreMultiplier: 1.0 },
-        hard: { shapes: SHAPES_HARD, scoreMultiplier: 1.5 }
+        easy:   { scoreMultiplier: 0.7 },
+        normal: { scoreMultiplier: 1.0 },
+        hard:   { scoreMultiplier: 1.5 }
     };
 
     var state = {
@@ -224,16 +224,63 @@
         fillTray(true);
     }
 
+    function countPlacements(matrix) {
+        var count = 0;
+        for (var y = 0; y < CONFIG.BOARD_SIZE; y++) {
+            for (var x = 0; x < CONFIG.BOARD_SIZE; x++) {
+                if (canPlaceShape(matrix, x, y)) count++;
+            }
+        }
+        return count;
+    }
+
+    function getShapeWeight(placements, area, difficulty) {
+        var p = placements + 1;
+        switch (difficulty) {
+            case 'easy':   return Math.pow(p, 2) / area;
+            case 'normal': return p;
+            case 'hard':   return Math.pow(p, 0.3) * area;
+        }
+    }
+
     function fillTray(force) {
         if (force === undefined) force = false;
         var isEmpty = state.availableShapes.every(function (s) { return s === null; });
         if (!isEmpty && !force) return;
 
-        var pool = DIFFICULTY_CONFIG[state.difficulty].shapes;
+        var diff = state.difficulty;
         for (var i = 0; i < 3; i++) {
-            var randomMatrix = pool[Math.floor(Math.random() * pool.length)];
+            var weightItems = [];
+            var totalWeight = 0;
+            for (var s = 0; s < SHAPES_ALL.length; s++) {
+                var matrix = SHAPES_ALL[s];
+                var placements = countPlacements(matrix);
+                var area = 0;
+                for (var r = 0; r < matrix.length; r++) {
+                    for (var c = 0; c < matrix[r].length; c++) {
+                        area += matrix[r][c];
+                    }
+                }
+                var w = getShapeWeight(placements, area, diff);
+                if (w > 0) {
+                    weightItems.push({ idx: s, w: w });
+                    totalWeight += w;
+                }
+            }
+
+            var chosenMatrix;
+            var rand = Math.random() * totalWeight;
+            var cum = 0;
+            for (var wi = 0; wi < weightItems.length; wi++) {
+                cum += weightItems[wi].w;
+                if (rand <= cum) {
+                    chosenMatrix = SHAPES_ALL[weightItems[wi].idx];
+                    break;
+                }
+            }
+
             var randomAttr = ATTRIBUTES[Math.floor(Math.random() * ATTRIBUTES.length)];
-            var shapeData = { matrix: randomMatrix, attribute: randomAttr };
+            var shapeData = { matrix: chosenMatrix, attribute: randomAttr };
             state.availableShapes[i] = shapeData;
             renderShapeInSlot(shapeData, i);
         }
