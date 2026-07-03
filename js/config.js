@@ -1,15 +1,9 @@
     var scaleFactor = 1;
-    if (window.innerHeight < 700 || window.innerWidth < 900) {
-        var scaleH = window.innerHeight / 700;
-        var scaleW = window.innerWidth / 900;
-        scaleFactor = Math.min(scaleH, scaleW);
-        if (scaleFactor > 1) scaleFactor = 1;
-    }
 
     var CONFIG = {
         BOARD_SIZE: 8,
-        CELL_SIZE: Math.floor(54 * scaleFactor),
-        GAP: Math.floor(2 * scaleFactor) || 1,
+        CELL_SIZE: 54,
+        GAP: 2,
         SCORE_BLOCK: 10,
         SCORE_LINE: 100,
         SCORE_MULTI_MULTIPLIER: 50,
@@ -17,10 +11,26 @@
     };
 
     var TRAY_CELL_RATIO = 0.65;
-    var TRAY_CELL_SIZE = Math.floor(CONFIG.CELL_SIZE * TRAY_CELL_RATIO);
+    var TRAY_CELL_SIZE = 35;
 
-    document.documentElement.style.setProperty('--cell-size', CONFIG.CELL_SIZE + 'px');
-    document.documentElement.style.setProperty('--grid-gap', CONFIG.GAP + 'px');
+    function recalcLayout() {
+        var availW = window.innerWidth;
+        var availH = window.innerHeight;
+
+        var cellByW = Math.floor((availW - 40) / 9);
+        var cellByH = Math.floor((availH - 200) / 9);
+        var newSize = Math.max(18, Math.min(cellByW, cellByH, 64));
+
+        CONFIG.CELL_SIZE = newSize;
+        CONFIG.GAP = Math.max(1, Math.floor(newSize / 27));
+        TRAY_CELL_SIZE = Math.floor(newSize * TRAY_CELL_RATIO);
+        scaleFactor = newSize / 54;
+
+        document.documentElement.style.setProperty('--cell-size', newSize + 'px');
+        document.documentElement.style.setProperty('--grid-gap', CONFIG.GAP + 'px');
+    }
+
+    recalcLayout();
 
     var ATTRIBUTES = [
         { id: 'glacio', icon: '<img src="img/attribute/Glacio.svg" class="attr-icon">' },

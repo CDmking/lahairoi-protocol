@@ -9,12 +9,24 @@
     var dragOffsetX = 0;
     var dragOffsetY = 0;
 
+    var resizeTimer = null;
+    function onResize() {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+            recalcLayout();
+            for (var ri = 0; ri < 3; ri++) {
+                if (state.availableShapes[ri]) renderShapeInSlot(state.availableShapes[ri], ri);
+            }
+        }, 150);
+    }
+
     function init() {
         if (state.isDemoMode) {
             state.isDemoMode = false;
             var overlay = document.getElementById('demoOverlay');
             if (overlay) overlay.classList.remove('show');
         }
+        recalcLayout();
         loadLeaderboard();
         renderLeaderboard();
 
@@ -109,13 +121,8 @@
 
         var rect = draggedElement.getBoundingClientRect();
 
-        if (isTouch) {
-            dragOffsetX = rect.width / 2;
-            dragOffsetY = rect.height + (40 * scaleFactor);
-        } else {
-            dragOffsetX = clientX - rect.left;
-            dragOffsetY = clientY - rect.top;
-        }
+        dragOffsetX = clientX - rect.left;
+        dragOffsetY = clientY - rect.top;
 
         draggedElement.classList.add('dragging');
         document.body.appendChild(draggedElement);
@@ -711,6 +718,11 @@
                 });
             }
 
+            document.getElementById('leaderboardToggle').addEventListener('click', function () {
+                var lb = document.querySelector('.leaderboard-container');
+                if (lb) lb.classList.toggle('show');
+            });
+
             helpBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 openDemo();
@@ -759,6 +771,9 @@
             }
 
             eventsBound = true;
+
+            window.addEventListener('resize', onResize);
+            window.addEventListener('orientationchange', onResize);
         }
 
         setDifficulty(state.difficulty);

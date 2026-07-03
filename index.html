@@ -8,9 +8,10 @@
 </head>
 <body>
     <div class="game-terminal">
-        <div class="portrait-warning" id="portraitWarning">
-            <div class="icon">📱</div>
-            <div style="line-height: 1.5;">系统侦测到终端姿态异常<br>请旋转设备至 <b>[ 横屏 ]</b> 模式以解除锁定</div>
+        <div class="footer-credits">
+            <span>Original Concept by KURO GAMES (Wuthering Waves)</span> |
+            <span>Recreated by <a href="https://space.bilibili.com/831032/" target="_blank" rel="noopener noreferrer">蒲公桜</a></span> |
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>
         </div>
 
         <div class="terminal-container">
@@ -81,6 +82,7 @@
                             <span class="score-label">HIGH SCORE</span>
                             <span class="score-value" id="highScore">0</span>
                         </div>
+                        <button class="leaderboard-toggle" id="leaderboardToggle">🏆</button>
                     </div>
                 </div>
 
@@ -121,15 +123,7 @@
                     <div class="tray-slot" id="slot-2"></div>
                 </div>
             </div>
-
-            <div class="footer-credits">
-                <span>Original Concept by KURO GAMES (Wuthering Waves)</span> |
-                <span>Recreated by <a href="https://space.bilibili.com/831032/" target="_blank" rel="noopener noreferrer">蒲公桜</a></span> |
-                <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>
-            </div>
-
         </div>
-    </div>
 
     <script src="js/config.js"></script>
     <script src="js/state.js"></script>
