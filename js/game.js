@@ -1,5 +1,3 @@
-window.WUWA = window.WUWA || {};
-(function () {
     var scaleFactor = 1;
     if (window.innerHeight < 700 || window.innerWidth < 900) {
         var scaleH = window.innerHeight / 700;
@@ -25,12 +23,12 @@ window.WUWA = window.WUWA || {};
     document.documentElement.style.setProperty('--grid-gap', CONFIG.GAP + 'px');
 
     var ATTRIBUTES = [
-        { id: 'glacio', name: '冷凝', icon: '<img src="img/attribute/Glacio.svg" class="attr-icon">' },
-        { id: 'fusion', name: '热熔', icon: '<img src="img/attribute/Fusion.svg" class="attr-icon">' },
-        { id: 'electro', name: '导电', icon: '<img src="img/attribute/Electro.svg" class="attr-icon">' },
-        { id: 'aero', name: '气动', icon: '<img src="img/attribute/Aero.svg" class="attr-icon">' },
-        { id: 'spectro', name: '衍射', icon: '<img src="img/attribute/Spectro.svg" class="attr-icon">' },
-        { id: 'havoc', name: '湮灭', icon: '<img src="img/attribute/Havoc.svg" class="attr-icon">' }
+        { id: 'glacio', icon: '<img src="img/attribute/Glacio.svg" class="attr-icon">' },
+        { id: 'fusion', icon: '<img src="img/attribute/Fusion.svg" class="attr-icon">' },
+        { id: 'electro', icon: '<img src="img/attribute/Electro.svg" class="attr-icon">' },
+        { id: 'aero', icon: '<img src="img/attribute/Aero.svg" class="attr-icon">' },
+        { id: 'spectro', icon: '<img src="img/attribute/Spectro.svg" class="attr-icon">' },
+        { id: 'havoc', icon: '<img src="img/attribute/Havoc.svg" class="attr-icon">' }
     ];
 
     var SHAPES_EASY = [
@@ -78,10 +76,12 @@ window.WUWA = window.WUWA || {};
         [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
     ];
 
+    var DEFAULT_ATTR_SCORES = { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 };
+
     var DIFFICULTY_CONFIG = {
-        easy: { shapes: SHAPES_EASY, scoreMultiplier: 0.7, label: 'SIMPLE' },
-        normal: { shapes: SHAPES_ALL, scoreMultiplier: 1.0, label: 'STANDARD' },
-        hard: { shapes: SHAPES_HARD, scoreMultiplier: 1.5, label: 'CHALLENGE' }
+        easy: { shapes: SHAPES_EASY, scoreMultiplier: 0.7 },
+        normal: { shapes: SHAPES_ALL, scoreMultiplier: 1.0 },
+        hard: { shapes: SHAPES_HARD, scoreMultiplier: 1.5 }
     };
 
     var state = {
@@ -90,14 +90,14 @@ window.WUWA = window.WUWA || {};
         highScore: 0,
         difficulty: 'easy',
         isDemoMode: false,
-        attrScores: { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 },
+        attrScores: Object.assign({}, DEFAULT_ATTR_SCORES),
         availableShapes: [null, null, null],
         isGameOver: false
     };
 
     var leaderboardData = {
         records: [],
-        attrHighScores: { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 }
+        attrHighScores: Object.assign({}, DEFAULT_ATTR_SCORES)
     };
 
     var boardEl, traySlots, currentScoreEl, highScoreEl, gameOverOverlay, restartBtn;
@@ -127,7 +127,7 @@ window.WUWA = window.WUWA || {};
                 if (Array.isArray(parsed)) {
                     leaderboardData = {
                         records: parsed,
-                        attrHighScores: { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 }
+                        attrHighScores: Object.assign({}, DEFAULT_ATTR_SCORES)
                     };
                 } else {
                     leaderboardData = parsed;
@@ -138,23 +138,26 @@ window.WUWA = window.WUWA || {};
             } else {
                 leaderboardData = {
                     records: [],
-                    attrHighScores: { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 }
+                    attrHighScores: Object.assign({}, DEFAULT_ATTR_SCORES)
                 };
             }
         } catch (e) {
             leaderboardData = {
                 records: [],
-                attrHighScores: { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 }
+                attrHighScores: Object.assign({}, DEFAULT_ATTR_SCORES)
             };
         }
+        updateHighScore();
+    }
+
+    function updateHighScore() {
         state.highScore = leaderboardData.records.length > 0 ? leaderboardData.records[0].score : 0;
         highScoreEl.innerText = state.highScore;
     }
 
     function saveLeaderboard() {
         localStorage.setItem('lahairo_v3_leaderboard', JSON.stringify(leaderboardData));
-        state.highScore = leaderboardData.records.length > 0 ? leaderboardData.records[0].score : 0;
-        highScoreEl.innerText = state.highScore;
+        updateHighScore();
         renderLeaderboard();
     }
 
@@ -242,40 +245,40 @@ window.WUWA = window.WUWA || {};
         slotEl.innerHTML = '';
         if (!shapeData) return;
 
-        var shapeEl = document.createElement('div');
-        shapeEl.className = 'shape-element';
         var matrix = shapeData.matrix;
         var attr = shapeData.attribute;
         var rows = matrix.length;
         var cols = matrix[0].length;
 
-        shapeEl.style.gridTemplateColumns = 'repeat(' + cols + ', ' + TRAY_CELL_SIZE + 'px)';
-        shapeEl.style.gridTemplateRows = 'repeat(' + rows + ', ' + TRAY_CELL_SIZE + 'px)';
-        shapeEl.style.setProperty('--cell-size', TRAY_CELL_SIZE + 'px');
-        shapeEl.dataset.slotIndex = slotIndex;
-        shapeEl.shapeData = shapeData;
-
+        var cells = '';
         for (var sy = 0; sy < rows; sy++) {
             for (var sx = 0; sx < cols; sx++) {
-                var block = document.createElement('div');
-                if (matrix[sy][sx] === 1) {
-                    block.className = 'shape-cell attr-' + attr.id + '-bg';
-                    block.innerHTML = attr.icon;
-                    block.style.boxShadow = 'inset 0 0 5px rgba(255,255,255,0.8), 0 0 10px var(--attr-' + attr.id + ')';
-                } else {
-                    block.className = 'shape-cell empty';
-                }
-                shapeEl.appendChild(block);
+                var isFilled = matrix[sy][sx] === 1;
+                var cls = isFilled ? 'shape-cell attr-' + attr.id + '-bg' : 'shape-cell empty';
+                var sty = isFilled ? ' style="box-shadow:inset 0 0 5px rgba(255,255,255,0.8),0 0 10px var(--attr-' + attr.id + ')"' : '';
+                var inner = isFilled ? attr.icon : '';
+                cells += '<div class="' + cls + '"' + sty + '>' + inner + '</div>';
             }
         }
 
-        shapeEl.style.left = 'calc(50% - ' + (cols * TRAY_CELL_SIZE + (cols - 1) * CONFIG.GAP) / 2 + 'px)';
-        shapeEl.style.top = 'calc(50% - ' + (rows * TRAY_CELL_SIZE + (rows - 1) * CONFIG.GAP) / 2 + 'px)';
-
+        var shapeEl = document.createElement('div');
+        shapeEl.className = 'shape-element';
+        shapeEl.style.cssText = 'grid-template-columns:repeat(' + cols + ',' + TRAY_CELL_SIZE + 'px);grid-template-rows:repeat(' + rows + ',' + TRAY_CELL_SIZE + 'px);--cell-size:' + TRAY_CELL_SIZE + 'px;left:calc(50% - ' + (cols * TRAY_CELL_SIZE + (cols - 1) * CONFIG.GAP) / 2 + 'px);top:calc(50% - ' + (rows * TRAY_CELL_SIZE + (rows - 1) * CONFIG.GAP) / 2 + 'px)';
+        shapeEl.dataset.slotIndex = slotIndex;
+        shapeEl.shapeData = shapeData;
+        shapeEl.innerHTML = cells;
         shapeEl.addEventListener('mousedown', onDragStart);
         shapeEl.addEventListener('touchstart', onDragStart, { passive: false });
 
         slotEl.appendChild(shapeEl);
+    }
+
+    function setShapeGrid(size) {
+        var m = draggedShapeData.matrix;
+        var c = m[0].length, r = m.length;
+        draggedElement.style.gridTemplateColumns = 'repeat(' + c + ', ' + size + 'px)';
+        draggedElement.style.gridTemplateRows = 'repeat(' + r + ', ' + size + 'px)';
+        draggedElement.style.setProperty('--cell-size', size + 'px');
     }
 
     function onDragStart(e) {
@@ -286,12 +289,7 @@ window.WUWA = window.WUWA || {};
         draggedShapeData = draggedElement.shapeData;
         draggedSlotIndex = parseInt(draggedElement.dataset.slotIndex);
 
-        var matrix = draggedShapeData.matrix;
-        var rows = matrix.length;
-        var cols = matrix[0].length;
-        draggedElement.style.gridTemplateColumns = 'repeat(' + cols + ', ' + CONFIG.CELL_SIZE + 'px)';
-        draggedElement.style.gridTemplateRows = 'repeat(' + rows + ', ' + CONFIG.CELL_SIZE + 'px)';
-        draggedElement.style.setProperty('--cell-size', CONFIG.CELL_SIZE + 'px');
+        setShapeGrid(CONFIG.CELL_SIZE);
         draggedElement.style.left = '';
         draggedElement.style.top = '';
 
@@ -352,14 +350,11 @@ window.WUWA = window.WUWA || {};
             if (!state.isGameOver) checkGameOver();
 
         } else {
-            var matrix = draggedShapeData.matrix;
-            var rows = matrix.length;
-            var cols = matrix[0].length;
-            draggedElement.style.gridTemplateColumns = 'repeat(' + cols + ', ' + TRAY_CELL_SIZE + 'px)';
-            draggedElement.style.gridTemplateRows = 'repeat(' + rows + ', ' + TRAY_CELL_SIZE + 'px)';
-            draggedElement.style.setProperty('--cell-size', TRAY_CELL_SIZE + 'px');
-            draggedElement.style.left = 'calc(50% - ' + (cols * TRAY_CELL_SIZE + (cols - 1) * CONFIG.GAP) / 2 + 'px)';
-            draggedElement.style.top = 'calc(50% - ' + (rows * TRAY_CELL_SIZE + (rows - 1) * CONFIG.GAP) / 2 + 'px)';
+            setShapeGrid(TRAY_CELL_SIZE);
+            var m = draggedShapeData.matrix;
+            var c = m[0].length, r = m.length;
+            draggedElement.style.left = 'calc(50% - ' + (c * TRAY_CELL_SIZE + (c - 1) * CONFIG.GAP) / 2 + 'px)';
+            draggedElement.style.top = 'calc(50% - ' + (r * TRAY_CELL_SIZE + (r - 1) * CONFIG.GAP) / 2 + 'px)';
             draggedElement.classList.remove('dragging');
             traySlots[draggedSlotIndex].appendChild(draggedElement);
         }
@@ -459,7 +454,16 @@ window.WUWA = window.WUWA || {};
     }
 
     function checkLines() {
+        var clearedSet = {};
         var cellsToClear = [];
+
+        function addCell(cell) {
+            var key = cell.x + ',' + cell.y;
+            if (!clearedSet[key]) {
+                clearedSet[key] = true;
+                cellsToClear.push(cell);
+            }
+        }
 
         for (var y = 0; y < CONFIG.BOARD_SIZE; y++) {
             var rowData = [];
@@ -467,7 +471,7 @@ window.WUWA = window.WUWA || {};
                 if (state.board[y][x] !== null) rowData.push({ x: x, y: y, attrId: state.board[y][x].attrId });
             }
             if (rowData.length === CONFIG.BOARD_SIZE) {
-                cellsToClear.push.apply(cellsToClear, rowData);
+                rowData.forEach(addCell);
             }
         }
 
@@ -477,11 +481,7 @@ window.WUWA = window.WUWA || {};
                 if (state.board[cy][cx] !== null) colData.push({ x: cx, y: cy, attrId: state.board[cy][cx].attrId });
             }
             if (colData.length === CONFIG.BOARD_SIZE) {
-                colData.forEach(function (cell) {
-                    if (!cellsToClear.some(function (c) { return c.x === cell.x && c.y === cell.y; })) {
-                        cellsToClear.push(cell);
-                    }
-                });
+                colData.forEach(addCell);
             }
         }
 
@@ -600,35 +600,23 @@ window.WUWA = window.WUWA || {};
         var cols = matrix[0].length;
         var cellSize = CONFIG.CELL_SIZE;
         var gap = CONFIG.GAP;
+        var attrId = shapeData.attribute.id;
+
+        var cells = '';
+        for (var gy = 0; gy < rows; gy++) {
+            for (var gx = 0; gx < cols; gx++) {
+                if (matrix[gy][gx] === 1) {
+                    cells += '<div style="width:' + cellSize + 'px;height:' + cellSize + 'px;border-radius:2px;background-color:var(--attr-' + attrId + ');box-shadow:inset 0 0 5px rgba(255,255,255,0.8),0 0 10px var(--attr-' + attrId + ')"></div>';
+                } else {
+                    cells += '<div style="width:' + cellSize + 'px;height:' + cellSize + 'px;background:transparent"></div>';
+                }
+            }
+        }
 
         var ghost = document.createElement('div');
         ghost.className = 'demo-ghost';
-        ghost.style.position = 'fixed';
-        ghost.style.zIndex = '9999';
-        ghost.style.pointerEvents = 'none';
-        ghost.style.display = 'grid';
-        ghost.style.gridTemplateColumns = 'repeat(' + cols + ',' + cellSize + 'px)';
-        ghost.style.gridTemplateRows = 'repeat(' + rows + ',' + cellSize + 'px)';
-        ghost.style.gap = gap + 'px';
-        ghost.style.transition = 'all 0.28s cubic-bezier(.2,.9,.3,1)';
-
-        for (var gy = 0; gy < rows; gy++) {
-            for (var gx = 0; gx < cols; gx++) {
-                var block = document.createElement('div');
-                if (matrix[gy][gx] === 1) {
-                    block.style.width = cellSize + 'px';
-                    block.style.height = cellSize + 'px';
-                    block.style.borderRadius = '2px';
-                    block.style.backgroundColor = 'var(--attr-' + shapeData.attribute.id + ')';
-                    block.style.boxShadow = 'inset 0 0 5px rgba(255,255,255,0.8), 0 0 10px var(--attr-' + shapeData.attribute.id + ')';
-                } else {
-                    block.style.width = cellSize + 'px';
-                    block.style.height = cellSize + 'px';
-                    block.style.background = 'transparent';
-                }
-                ghost.appendChild(block);
-            }
-        }
+        ghost.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;display:grid;grid-template-columns:repeat(' + cols + ',' + cellSize + 'px);grid-template-rows:repeat(' + rows + ',' + cellSize + 'px);gap:' + gap + 'px;transition:all 0.28s cubic-bezier(.2,.9,.3,1)';
+        ghost.innerHTML = cells;
 
         var slotRect = traySlots[slotIndex].getBoundingClientRect();
         var ghostW = cols * cellSize + (cols - 1) * gap;
@@ -830,11 +818,9 @@ window.WUWA = window.WUWA || {};
         init();
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        WUWA.initGame();
-    });
+    document.addEventListener('DOMContentLoaded', initGame);
 
-    WUWA.initGame = function () {
+    function initGame() {
         boardEl = document.getElementById('board');
         traySlots = [
             document.getElementById('slot-0'),
@@ -952,7 +938,7 @@ window.WUWA = window.WUWA || {};
             confirmClearBtn.addEventListener('click', function () {
                 leaderboardData = {
                     records: [],
-                    attrHighScores: { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 }
+                    attrHighScores: Object.assign({}, DEFAULT_ATTR_SCORES)
                 };
                 saveLeaderboard();
                 clearModal.style.display = 'none';
@@ -1004,23 +990,20 @@ window.WUWA = window.WUWA || {};
                 if (e.target === this) closeDemo();
             });
 
-            (function bindDots() {
-                var dots = document.querySelectorAll('.demo-dot');
-                for (var dbi = 0; dbi < dots.length; dbi++) {
-                    dots[dbi].addEventListener('click', function () {
-                        var idx = parseInt(this.dataset.index);
-                        if (!isNaN(idx) && idx !== currentScene) {
-                            if (autoPlayTimer) { clearTimeout(autoPlayTimer); autoPlayTimer = null; }
-                            applyScene(idx);
-                            autoPlayTimer = setTimeout(playScene, 1000);
-                        }
-                    });
-                }
-            })();
+            var dots = document.querySelectorAll('.demo-dot');
+            for (var dbi = 0; dbi < dots.length; dbi++) {
+                dots[dbi].addEventListener('click', function () {
+                    var idx = parseInt(this.dataset.index);
+                    if (!isNaN(idx) && idx !== currentScene) {
+                        if (autoPlayTimer) { clearTimeout(autoPlayTimer); autoPlayTimer = null; }
+                        applyScene(idx);
+                        autoPlayTimer = setTimeout(playScene, 1000);
+                    }
+                });
+            }
 
             eventsBound = true;
         }
 
         setDifficulty(state.difficulty);
-    };
-})();
+    }
