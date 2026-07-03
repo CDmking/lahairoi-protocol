@@ -8,7 +8,7 @@
 
     function loadLeaderboard() {
         try {
-            var stored = localStorage.getItem('lahairo_v3_leaderboard');
+            var stored = localStorage.getItem('lahairoi_v3_leaderboard');
             if (stored) {
                 var parsed = JSON.parse(stored);
                 if (Array.isArray(parsed)) {
@@ -43,7 +43,7 @@
     }
 
     function saveLeaderboard() {
-        localStorage.setItem('lahairo_v3_leaderboard', JSON.stringify(leaderboardData));
+        localStorage.setItem('lahairoi_v3_leaderboard', JSON.stringify(leaderboardData));
         updateHighScore();
         renderLeaderboard();
     }
