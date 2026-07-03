@@ -673,7 +673,7 @@
                     } else if (parsed && Array.isArray(parsed.records)) {
                         leaderboardData = parsed;
                         if (!leaderboardData.attrHighScores) {
-                            leaderboardData.attrHighScores = { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 };
+                            leaderboardData.attrHighScores = Object.assign({}, DEFAULT_ATTR_SCORES);
                         }
                     } else {
                         showToast('数据格式错误，解析失败。');

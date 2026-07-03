@@ -19,14 +19,11 @@
                 } else {
                     leaderboardData = parsed;
                     if (!leaderboardData.attrHighScores) {
-                        leaderboardData.attrHighScores = { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 };
+                        leaderboardData.attrHighScores = Object.assign({}, DEFAULT_ATTR_SCORES);
                     }
                 }
             } else {
-                leaderboardData = {
-                    records: [],
-                    attrHighScores: Object.assign({}, DEFAULT_ATTR_SCORES)
-                };
+                throw 'empty';
             }
         } catch (e) {
             leaderboardData = {

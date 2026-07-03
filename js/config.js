@@ -1,5 +1,3 @@
-    var scaleFactor = 1;
-
     var CONFIG = {
         BOARD_SIZE: 8,
         CELL_SIZE: 54,
@@ -24,7 +22,6 @@
         CONFIG.CELL_SIZE = newSize;
         CONFIG.GAP = Math.max(1, Math.floor(newSize / 27));
         TRAY_CELL_SIZE = Math.floor(newSize * TRAY_CELL_RATIO);
-        scaleFactor = newSize / 54;
 
         document.documentElement.style.setProperty('--cell-size', newSize + 'px');
         document.documentElement.style.setProperty('--grid-gap', CONFIG.GAP + 'px');
@@ -39,15 +36,6 @@
         { id: 'aero', icon: '<img src="img/attribute/Aero.svg" class="attr-icon">' },
         { id: 'spectro', icon: '<img src="img/attribute/Spectro.svg" class="attr-icon">' },
         { id: 'havoc', icon: '<img src="img/attribute/Havoc.svg" class="attr-icon">' }
-    ];
-
-    var SHAPES_EASY = [
-        [[1]],
-        [[1, 1]], [[1], [1]],
-        [[1, 1, 1]], [[1], [1], [1]],
-        [[1, 1], [1, 1]],
-        [[1, 1, 1, 1]], [[1], [1], [1], [1]],
-        [[1, 1], [1, 0]], [[1, 1], [0, 1]], [[0, 1], [1, 1]], [[1, 0], [1, 1]]
     ];
 
     var SHAPES_ALL = [
@@ -68,22 +56,6 @@
         [[1, 0], [1, 1], [0, 1]],
         [[1, 1, 0], [0, 1, 1]],
         [[0, 1], [1, 1], [1, 0]]
-    ];
-
-    var SHAPES_HARD = [
-        [[1, 1, 1, 1]], [[1], [1], [1], [1]],
-        [[1, 1], [1, 0]], [[1, 1], [0, 1]], [[0, 1], [1, 1]], [[1, 0], [1, 1]],
-        [[1, 1, 1], [1, 0, 0], [1, 0, 0]], [[1, 1, 1], [0, 0, 1], [0, 0, 1]],
-        [[1, 0, 0], [1, 0, 0], [1, 1, 1]], [[0, 0, 1], [0, 0, 1], [1, 1, 1]],
-        [[0, 1, 0], [1, 1, 1]],
-        [[1, 1, 1], [0, 1, 0]],
-        [[1, 0], [1, 1], [1, 0]],
-        [[0, 1], [1, 1], [0, 1]],
-        [[0, 1, 1], [1, 1, 0]],
-        [[1, 0], [1, 1], [0, 1]],
-        [[1, 1, 0], [0, 1, 1]],
-        [[0, 1], [1, 1], [1, 0]],
-        [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
     ];
 
     var DEFAULT_ATTR_SCORES = { glacio: 0, fusion: 0, electro: 0, aero: 0, spectro: 0, havoc: 0 };
