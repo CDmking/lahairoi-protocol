@@ -249,33 +249,38 @@
         if (!isEmpty && !force) return;
 
         var diff = state.difficulty;
-        for (var i = 0; i < 3; i++) {
-            var weightItems = [];
-            var totalWeight = 0;
-            for (var s = 0; s < SHAPES_ALL.length; s++) {
-                var matrix = SHAPES_ALL[s];
-                var placements = countPlacements(matrix);
-                var area = 0;
-                for (var r = 0; r < matrix.length; r++) {
-                    for (var c = 0; c < matrix[r].length; c++) {
-                        area += matrix[r][c];
-                    }
-                }
-                var w = getShapeWeight(placements, area, diff);
-                if (w > 0) {
-                    weightItems.push({ idx: s, w: w });
-                    totalWeight += w;
+
+        var weightItems = [];
+        var totalWeight = 0;
+        for (var s = 0; s < SHAPES_ALL.length; s++) {
+            var matrix = SHAPES_ALL[s];
+            var placements = countPlacements(matrix);
+            var area = 0;
+            for (var r = 0; r < matrix.length; r++) {
+                for (var c = 0; c < matrix[r].length; c++) {
+                    area += matrix[r][c];
                 }
             }
+            var w = getShapeWeight(placements, area, diff);
+            if (w > 0) {
+                weightItems.push({ idx: s, w: w });
+                totalWeight += w;
+            }
+        }
 
+        for (var i = 0; i < 3; i++) {
             var chosenMatrix;
-            var rand = Math.random() * totalWeight;
-            var cum = 0;
-            for (var wi = 0; wi < weightItems.length; wi++) {
-                cum += weightItems[wi].w;
-                if (rand <= cum) {
-                    chosenMatrix = SHAPES_ALL[weightItems[wi].idx];
-                    break;
+            if (totalWeight === 0) {
+                chosenMatrix = SHAPES_ALL[Math.floor(Math.random() * SHAPES_ALL.length)];
+            } else {
+                var rand = Math.random() * totalWeight;
+                var cum = 0;
+                for (var wi = 0; wi < weightItems.length; wi++) {
+                    cum += weightItems[wi].w;
+                    if (rand <= cum) {
+                        chosenMatrix = SHAPES_ALL[weightItems[wi].idx];
+                        break;
+                    }
                 }
             }
 
