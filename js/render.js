@@ -85,6 +85,16 @@
         var rows = matrix.length;
         var cols = matrix[0].length;
 
+        var slotH = slotEl.clientHeight || 130;
+        var slotW = slotEl.clientWidth || 150;
+        var cellSize = Math.min(
+            TRAY_CELL_SIZE,
+            Math.floor((slotH - 8 - (rows - 1) * CONFIG.GAP) / rows),
+            Math.floor((slotW - 8 - (cols - 1) * CONFIG.GAP) / cols)
+        );
+        cellSize = Math.max(12, cellSize);
+        shapeData._trayCellSize = cellSize;
+
         var cells = '';
         for (var sy = 0; sy < rows; sy++) {
             for (var sx = 0; sx < cols; sx++) {
@@ -98,7 +108,7 @@
 
         var shapeEl = document.createElement('div');
         shapeEl.className = 'shape-element';
-        shapeEl.style.cssText = 'grid-template-columns:repeat(' + cols + ',' + TRAY_CELL_SIZE + 'px);grid-template-rows:repeat(' + rows + ',' + TRAY_CELL_SIZE + 'px);--cell-size:' + TRAY_CELL_SIZE + 'px;left:calc(50% - ' + (cols * TRAY_CELL_SIZE + (cols - 1) * CONFIG.GAP) / 2 + 'px);top:calc(50% - ' + (rows * TRAY_CELL_SIZE + (rows - 1) * CONFIG.GAP) / 2 + 'px)';
+        shapeEl.style.cssText = 'grid-template-columns:repeat(' + cols + ',' + cellSize + 'px);grid-template-rows:repeat(' + rows + ',' + cellSize + 'px);--cell-size:' + cellSize + 'px;left:calc(50% - ' + (cols * cellSize + (cols - 1) * CONFIG.GAP) / 2 + 'px);top:calc(50% - ' + (rows * cellSize + (rows - 1) * CONFIG.GAP) / 2 + 'px)';
         shapeEl.dataset.slotIndex = slotIndex;
         shapeEl.shapeData = shapeData;
         shapeEl.innerHTML = cells;

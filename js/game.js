@@ -167,11 +167,12 @@
             if (!state.isGameOver) checkGameOver();
 
         } else {
-            setShapeGrid(TRAY_CELL_SIZE);
+            var tcs = draggedShapeData._trayCellSize || TRAY_CELL_SIZE;
+            setShapeGrid(tcs);
             var m = draggedShapeData.matrix;
             var c = m[0].length, r = m.length;
-            draggedElement.style.left = 'calc(50% - ' + (c * TRAY_CELL_SIZE + (c - 1) * CONFIG.GAP) / 2 + 'px)';
-            draggedElement.style.top = 'calc(50% - ' + (r * TRAY_CELL_SIZE + (r - 1) * CONFIG.GAP) / 2 + 'px)';
+            draggedElement.style.left = 'calc(50% - ' + (c * tcs + (c - 1) * CONFIG.GAP) / 2 + 'px)';
+            draggedElement.style.top = 'calc(50% - ' + (r * tcs + (r - 1) * CONFIG.GAP) / 2 + 'px)';
             draggedElement.classList.remove('dragging');
             traySlots[draggedSlotIndex].appendChild(draggedElement);
         }
